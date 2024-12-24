@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Światła</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<link rel="icon" href="{{ url_for('static', filename='site_icon.png') }}" type="image/x-icon">
+
+<body>
+    <!-- Header z menu i tytułem -->
+    <header>
+        <button class="close-btn" onclick="toggleMenu()">
+            <img id="menu-icon" src="{{ url_for('static', filename='menu_icon_light.png') }}" alt="Menu Toggle" class="menu-toggle">
+        </button>
+        <h1>Światła</h1>
+    </header>
+
+    <!-- Boczne menu nawigacyjne -->
+    <div id="sideMenu" class="side-menu">
+        <button style="margin-top: 18px;" class="close-btn" onclick="toggleMenu()">
+            <img id="menu-icon-side" src="{{ url_for('static', filename='menu_icon_light.png') }}" alt="Menu Toggle" class="menu-toggle">
+        </button>
+        <nav style="margin-top: 55px;" class="menu">
+            <ul>
+                <li><a href="/" class="menu-link"><img id="home-icon" class="menu-icon" src="{{ url_for('static', filename='home_icon_light.png') }}" alt="Home"> Strona Główna</a></li>
+                <li><a href="/lights" class="menu-link"><img id="lights-icon" class="menu-icon" src="{{ url_for('static', filename='lights_icon_light.png') }}" alt="Lights"> Światła</a></li>
+                <li><a href="/temperature" class="menu-link"><img id="temperature-icon" class="menu-icon" src="{{ url_for('static', filename='temperature_icon_light.png') }}" alt="Temperature"> Temperatura</a></li>
+                <li><a href="/security" class="menu-link"><img id="security-icon" class="menu-icon" src="{{ url_for('static', filename='security_icon_light.png') }}" alt="Security"> Zabezpieczenia</a></li>
+                <li><a href="/settings" class="menu-link"><img id="settings-icon" class="menu-icon" src="{{ url_for('static', filename='settings_icon_light.png') }}" alt="Settings"> Ustawienia</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Główna zawartość strony -->
+    <main>
+        <!-- Sekcja dla każdego pomieszczenia -->
+        <h2>Salon:</h2>
+        <div class="center-container">
+            <hr3>Światło główne</hr3>
+            <label class="switch">
+                <input type="checkbox" id="salonSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h2>Kuchnia:</h2>
+        <div class="center-container">
+            <hr3>Światło główne</hr3>
+            <label class="switch">
+                <input type="checkbox" id="kitchenSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h2>Łazienka:</h2>
+        <div class="center-container">
+            <hr3>Światło główne 1</hr3>
+            <label class="switch">
+                <input type="checkbox" id="bathroomSwitch">
+                <span class="slider"></span>
+            </label>
+            <hr3>Led nad wanną</hr3>
+            <label class="switch">
+                <input type="checkbox" id="bathroom_ledSwitch">
+                <span class="slider"></span>
+            </label>
+            <hr3>Lampka przy lustrze</hr3>
+            <label class="switch">
+                <input type="checkbox" id="bathroom_mirrorSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h2>Korytarz:</h2>
+        <div class="center-container">
+            <hr3>Światło główne</hr3>
+            <label class="switch">
+                <input type="checkbox" id="hallSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h2>Sypialnia:</h2>
+        <div class="center-container">
+            <hr3>Światło główne</hr3>
+            <label class="switch">
+                <input type="checkbox" id="bedroomSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr>
+        <h2>Garderoba:</h2>
+        <div class="center-container">
+            <hr3>Światło główne</hr3>
+            <label class="switch">
+                <input type="checkbox" id="wardrobeSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </main>
+
+    <!-- Stopka strony -->
+    <footer>
+        <p>&copy; 2024 Smart Home Inc. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Skrypty obsługujące interakcje -->
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+    <script>
+        const socket = io.connect();
+
+        // Inicjalizacja strony: ustawienie motywu, ikon menu i stanów przełączników
+        document.addEventListener('DOMContentLoaded', function () {
+            // Odczyt motywu z localStorage
+            const storedTheme = localStorage.getItem('theme');
+            if (storedTheme) {
+                document.documentElement.setAttribute('data-theme', storedTheme);
+            }
+
+            // Inicjalizacja stanów przełączników
+            const switches = [
+                { id: 'salonSwitch', room: 'salon' },
+                { id: 'kitchenSwitch', room: 'kitchen' },
+                { id: 'bathroomSwitch', room: 'bathroom' },
+                { id: 'bathroom_ledSwitch', room: 'bathroom_led' },
+                { id: 'bathroom_mirrorSwitch', room: 'bathroom_mirror' },
+                { id: 'hallSwitch', room: 'hall' },
+                { id: 'bedroomSwitch', room: 'bedroom' },
+                { id: 'wardrobeSwitch', room: 'wardrobe' }
+            ];
+
+            // Pobranie aktualnych stanów przełączników z serwera
+            socket.emit('get_states');
+
+            // Nasłuchuj na aktualizacje stanów
+            socket.on('update_light', function(data) {
+                const switchElement = document.getElementById(data.room + 'Switch');
+                if (switchElement) {
+                    switchElement.checked = data.state;
+                }
+            });
+
+            // Nasłuchuj na synchronizację stanów po załadowaniu strony
+            socket.on('sync_states', function(states) {
+                for (const room in states) {
+                    const state = states[room];
+                    const switchElement = document.getElementById(room + 'Switch');
+                    if (switchElement) {
+                        switchElement.checked = state;
+                    }
+                }
+            });
+
+            // Przesyłanie zmian na serwer
+            switches.forEach(({ id, room }) => {
+                const switchElement = document.getElementById(id);
+                if (switchElement) {
+                    switchElement.addEventListener('change', (event) => {
+                        const isChecked = event.target.checked;
+                        socket.emit('toggle_light', { room: room, state: isChecked });
+                    });
+                }
+            });
+        });
+
+        // Zmiana motywu i zapis do localStorage
+        function changeTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        // Przełączanie widoczności bocznego menu
+        function toggleMenu() {
+            const sideMenu = document.getElementById('sideMenu');
+            const isVisible = sideMenu.style.left === '0px';
+            sideMenu.style.left = isVisible ? '-250px' : '0px';
+        }
+    </script>
+</body>
+
+</html>

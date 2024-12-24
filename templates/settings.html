@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ustawienia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<link rel="icon" href="{{ url_for('static', filename='site_icon.png') }}" type="image/x-icon">
+<body>
+    <header>
+        <button class="close-btn" onclick="toggleMenu()">
+            <img id="menu-icon-header" src="{{ url_for('static', filename='menu_icon_light.png') }}" alt="Menu Toggle" class="menu-toggle">
+        </button>
+        <h1>Ustawienia</h1>
+    </header>
+
+    <div id="sideMenu" class="side-menu">
+        <button style="margin-top: 18px;" class="close-btn" onclick="toggleMenu()">
+            <img id="menu-icon-side" src="{{ url_for('static', filename='menu_icon_light.png') }}" alt="Menu Toggle" class="menu-toggle">
+        </button>
+        <nav style="margin-top: 55px;" class="menu">
+            <ul>
+                <li><a href="/" class="menu-link"><img id="home-icon" class="menu-icon" src="{{ url_for('static', filename='home_icon_light.png') }}" alt="Home"> Strona Główna</a></li>
+                <li><a href="/lights" class="menu-link"><img id="lights-icon" class="menu-icon" src="{{ url_for('static', filename='lights_icon_light.png') }}" alt="Lights"> Światła</a></li>
+                <li><a href="/temperature" class="menu-link"><img id="temperature-icon" class="menu-icon" src="{{ url_for('static', filename='temperature_icon_light.png') }}" alt="Temperature"> Temperatura</a></li>
+                <li><a href="/security" class="menu-link"><img id="security-icon" class="menu-icon" src="{{ url_for('static', filename='security_icon_light.png') }}" alt="Security"> Zabezpieczenia</a></li>
+                <li><a href="/settings" class="menu-link"><img id="settings-icon" class="menu-icon" src="{{ url_for('static', filename='settings_icon_light.png') }}" alt="Settings"> Ustawienia</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <main>
+        <div class="center-container">
+            <h2>Wybierz motyw</h2>
+            <select class="select-theme" id="themeSelector" onchange="changeTheme(this.value)">
+                <option value="light">Light Theme</option>
+                <option value="dark">Dark Theme</option>
+            </select>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Smart Home Inc. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // Load saved theme from localStorage and apply it
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('theme') || 'light'; // Default to 'light' if no theme is saved
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            changeMenuIcon(savedTheme);
+            changeSideMenuIcons(savedTheme);
+
+            // Set the select element to the saved theme value
+            const themeSelector = document.getElementById('themeSelector');
+            themeSelector.value = savedTheme;
+        });
+
+        // Change theme and save it to localStorage
+        function changeTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            // Change the menu icon based on the theme
+            changeMenuIcon(theme);
+            changeSideMenuIcons(theme);
+        }
+
+        // Function to change the menu icon based on the theme
+        function changeMenuIcon(theme) {
+            const headerMenuIcon = document.getElementById('menu-icon-header');
+            const sideMenuIcon = document.getElementById('menu-icon-side');
+
+            const iconSrc = theme === 'dark' ? "{{ url_for('static', filename='menu_icon_dark.png') }}" : "{{ url_for('static', filename='menu_icon_light.png') }}";
+
+            // Change the icon for both the header and side menu
+            headerMenuIcon.src = iconSrc;
+            sideMenuIcon.src = iconSrc;
+        }
+
+        // Function to change the side menu icons based on the theme
+        function changeSideMenuIcons(theme) {
+            // Change icons for other menu items
+            document.getElementById('home-icon').src = theme === 'dark' ? "{{ url_for('static', filename='home_icon_dark.png') }}" : "{{ url_for('static', filename='home_icon_light.png') }}";
+            document.getElementById('lights-icon').src = theme === 'dark' ? "{{ url_for('static', filename='lights_icon_dark.png') }}" : "{{ url_for('static', filename='lights_icon_light.png') }}";
+            document.getElementById('temperature-icon').src = theme === 'dark' ? "{{ url_for('static', filename='temperature_icon_dark.png') }}" : "{{ url_for('static', filename='temperature_icon_light.png') }}";
+            document.getElementById('security-icon').src = theme === 'dark' ? "{{ url_for('static', filename='security_icon_dark.png') }}" : "{{ url_for('static', filename='security_icon_light.png') }}";
+            document.getElementById('settings-icon').src = theme === 'dark' ? "{{ url_for('static', filename='settings_icon_dark.png') }}" : "{{ url_for('static', filename='settings_icon_light.png') }}";
+        }
+
+        // Toggle side menu visibility
+        function toggleMenu() {
+            const sideMenu = document.getElementById('sideMenu');
+            const isVisible = sideMenu.style.left === '0px';
+            sideMenu.style.left = isVisible ? '-250px' : '0px';
+        }
+    </script>
+    
+</body>
+</html>
